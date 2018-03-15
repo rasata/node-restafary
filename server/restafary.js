@@ -32,7 +32,7 @@ function middle(options, request, response, next) {
     const prefix = options.prefix || '/fs';
     const root = options.root || '/';
     if(options.config){
-        filteringRegexp = options.config("fileFilterRegexp");
+        filteringRegexp = options.config("filteringRegexp");
         fileFilterHideOrDisplay = options.config("fileFilterHideOrDisplay");
     }
     const params  = {
