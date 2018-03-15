@@ -9,6 +9,8 @@ const ponse = require('ponse');
 const WIN = process.platform === 'win32';
 const CWD = process.cwd();
 const Fs = {};
+var filteringRegexp = "";
+var fileFilterHideOrDisplay = "";
 
 [
     'get',
@@ -29,7 +31,10 @@ function middle(options, request, response, next) {
     const isFile = /^\/restafary\.js(\.map)?$/.test(req.url);
     const prefix = options.prefix || '/fs';
     const root = options.root || '/';
-    
+    if(options.config){
+        filteringRegexp = options.config("fileFilterRegexp");
+        fileFilterHideOrDisplay = options.config("fileFilterHideOrDisplay");
+    }
     const params  = {
         root,
         request,
@@ -180,6 +185,18 @@ function onGet(p, callback) {
     let options = {};
     const isFile  = p.error && p.error.code === 'ENOTDIR';
     const isStr   = typeof p.data === 'string';
+  
+    if(filteringRegexp!=undefined && p.data !=undefined){
+        if(p.data.files!=undefined){
+            p.data.files = p.data.files.filter(function(file){
+                let doFilterFile = false;
+                filteringRegexp.forEach(function(expr){
+                    doFilterFile = xregexp.test(file.name,expr) || doFilterFile ;
+                });
+                return fileFilterHideOrDisplay == "show" ? doFilterFile : !doFilterFile;
+            });
+        }
+    }
     
     const params  = {
         gzip: true,
